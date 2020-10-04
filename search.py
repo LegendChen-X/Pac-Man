@@ -180,15 +180,19 @@ def uniformCostSearch(problem):
                 p_queue.push((new_path,new_actions),priority)
                 
             elif succ[0] not in path and succ[0] in seen:
+                old_priority = -1
                 for item in p_queue.heap:
-                    if item[2][0] == succ[0]:
-                        old_priority = problem.getCostOfActions(item[2][0])
+                    if item[2][0][-1] == succ[0]:
+                        old_priority = problem.getCostOfActions(item[2][-1])
                         
                 new_priority = problem.getCostOfActions(actions + [succ[1]])
                 
                 if old_priority > new_priority:
                     new_actions = actions + [succ[1]]
-                    p_queue.updata((succ[0],new_actions),new_priority)
+                    new_path = list(path)
+                    new_path.append(succ[0])
+                    p_queue.update((new_path,new_actions),new_priority)
+        
 
 def nullHeuristic(state, problem=None):
     """
