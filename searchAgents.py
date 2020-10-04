@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+from util import *
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -288,6 +289,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.startState = [0,0,0,0]
 
     def getStartState(self):
         """
@@ -295,14 +297,17 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.startingPosition, self.startState
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        for i in state[1]:
+            if i == 0:
+                return False
+        return True
 
     def getSuccessors(self, state):
         """
@@ -323,9 +328,17 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
-
+            x,y = state[0]
+            corn_state = list(state[1])
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                if (nextx, nexty) in self.corners:
+                    corn_state[self.corners.index((nextx,nexty))] = 1
+                next = ((nextx, nexty),corn_state)
+                cost = 1
+                successors.append((next,action,cost))
             "*** YOUR CODE HERE ***"
-
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -360,7 +373,14 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    if problem.isGoalState(state):
+        return 0
+    distances = []
+    
+    for i in range(len(state[1])):
+        if state[1][i] == 0:
+            distances.append(manhattanDistance(state[0],corners[index]))
+    return max(distances)
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
