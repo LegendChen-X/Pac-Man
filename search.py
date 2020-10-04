@@ -135,7 +135,6 @@ def breadthFirstSearch(problem):
             
         path, actions = queue.pop()
         state = path[-1]
-        seen.append(state)
         
         if problem.isGoalState(state):
             return actions
@@ -153,7 +152,43 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    if problem.isGoalState(problem.getStartState()):
+        return []
+    p_queue = PriorityQueue()
+    p_queue.push(([problem.getStartState()],[]),0)
+    seen = []
+    while 1:
+        if p_queue.isEmpty():
+            return []
+            
+        path, actions = p_queue.pop()
+        state = path[-1]
+        
+        if problem.isGoalState(state):
+            return actions
+            
+        succs = problem.getSuccessors(state)
+        
+        for succ in succs:
+            if succ[0] not in path and succ[0] not in seen:
+                seen.append(succ[0])
+                new_path = list(path)
+                new_path.append(succ[0])
+                new_actions = list(actions)
+                new_actions.append(succ[1])
+                priority = problem.getCostOfActions(new_actions)
+                p_queue.push((new_path,new_actions),priority)
+                
+            elif succ[0] not in path and succ[0] in seen:
+                for item in p_queue.heap:
+                    if item[2][0] == succ[0]:
+                        old_priority = problem.getCostOfActions(item[2][0])
+                        
+                new_priority = problem.getCostOfActions(actions + [succ[1]])
+                
+                if old_priority > new_priority:
+                    new_actions = actions + [succ[1]]
+                    p_queue.updata((succ[0],new_actions),new_priority)
 
 def nullHeuristic(state, problem=None):
     """
