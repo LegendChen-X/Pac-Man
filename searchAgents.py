@@ -305,10 +305,7 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        for i in state[1]:
-            if i == 0:
-                return False
-        return True
+        return sum(state[1]) == 4
 
     def getSuccessors(self, state):
         """
@@ -377,10 +374,9 @@ def cornersHeuristic(state, problem):
     if problem.isGoalState(state):
         return 0
     distances = []
-    
     for i in range(len(state[1])):
         if state[1][i] == 0:
-            distances.append(manhattanDistance(state[0],corners[index]))
+            distances.append(manhattanDistance(state[0],corners[i]))
     return max(distances)
 
 class AStarCornersAgent(SearchAgent):
@@ -536,7 +532,6 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
-
         "*** YOUR CODE HERE ***"
         list_food = self.food.asList()
         return state in list_food
