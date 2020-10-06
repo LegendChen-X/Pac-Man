@@ -129,46 +129,25 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    if problem.isGoalState(problem.getStartState()):
-        return []
+    if problem.isGoalState(problem.getStartState()): return []
     p_queue = PriorityQueue()
     p_queue.push(([problem.getStartState()],[]),0)
-    seen = []
+    seen = {}
     while 1:
-        if p_queue.isEmpty():
-            return []
-            
+        if p_queue.isEmpty(): return []
         path, actions = p_queue.pop()
         state = path[-1]
-        
-        if problem.isGoalState(state):
-            return actions
-            
+        if problem.isGoalState(state): return actions
+        if state in seen:
+            if seen[state] < problem.getCostOfActions(actions): continue
+        seen[state] = problem.getCostOfActions(actions)
         succs = problem.getSuccessors(state)
-        
         for succ in succs:
-            if succ[0] not in path and succ[0] not in seen:
-                seen.append(succ[0])
-                new_path = list(path)
-                new_path.append(succ[0])
-                new_actions = list(actions)
-                new_actions.append(succ[1])
-                priority = problem.getCostOfActions(new_actions)
-                p_queue.push((new_path,new_actions),priority)
-                
-            elif succ[0] not in path and succ[0] in seen:
-                old_priority = -1
-                for item in p_queue.heap:
-                    if item[2][0][-1] == succ[0]:
-                        old_priority = problem.getCostOfActions(item[2][-1])
-                        
-                new_priority = problem.getCostOfActions(actions + [succ[1]])
-                
-                if old_priority > new_priority:
-                    new_actions = actions + [succ[1]]
-                    new_path = list(path)
-                    new_path.append(succ[0])
-                    p_queue.update((new_path,new_actions),new_priority)
+            if succ[0] not in seen or problem.getCostOfActions(actions+[succ[1]]) < seen[succ[0]]:
+                new_path = path + [succ[0]]
+                new_actions = actions + [succ[1]]
+                p_queue.push(([new_path,new_actions]),problem.getCostOfActions(new_actions))
+                seen[succ[0]] = problem.getCostOfActions(new_actions)
         
 
 def nullHeuristic(state, problem=None):
