@@ -290,7 +290,10 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        self.startState = [0,0,0,0]
+        self.flag_0 = 0
+        self.flag_1 = 0
+        self.flag_2 = 0
+        self.flag_3 = 0
 
     def getStartState(self):
         """
@@ -298,14 +301,14 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return self.startingPosition, self.startState
+        return self.startingPosition, self.flag_0, self.flag_1, self.flag_2, self.flag_3
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        return sum(state[1]) == 4
+        return state[1] and state[2] and state[3] and state[4]
 
     def getSuccessors(self, state):
         """
@@ -327,13 +330,18 @@ class CornersProblem(search.SearchProblem):
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
             x,y = state[0]
-            corn_state = list(state[1])
+            flags = [state[1],state[2],state[3],state[4]]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
                 if (nextx, nexty) in self.corners:
-                    corn_state[self.corners.index((nextx,nexty))] = 1
-                next = ((nextx, nexty),corn_state)
+                    index = -1
+                    for i in range(len(self.corners)):
+                        if self.corners[i] == (nextx, nexty):
+                            flags[i] = 1
+                            break
+                    
+                next = ((nextx, nexty),flags[0],flags[1],flags[2],flags[3])
                 cost = 1
                 successors.append((next,action,cost))
             "*** YOUR CODE HERE ***"
@@ -352,7 +360,7 @@ class CornersProblem(search.SearchProblem):
             x, y = int(x + dx), int(y + dy)
             if self.walls[x][y]: return 999999
         return len(actions)
-
+    
 
 def cornersHeuristic(state, problem):
     """
@@ -373,11 +381,92 @@ def cornersHeuristic(state, problem):
     "*** YOUR CODE HERE ***"
     if problem.isGoalState(state):
         return 0
-    distances = []
-    for i in range(len(state[1])):
-        if state[1][i] == 0:
-            distances.append(manhattanDistance(state[0],corners[i]))
-    return max(distances)
+    
+    from collections import defaultdict
+    class Graph:
+        def __init__(self,vertices):
+            self.V= vertices
+            self.graph = []
+        def addEdge(self,u,v,w):
+            self.graph.append([u,v,w])
+            
+        def find(self, parent, i):
+            if parent[i] == i:
+                return i
+            return self.find(parent, parent[i])
+            
+        def union(self, parent, rank, x, y):
+              xroot = self.find(parent, x)
+              yroot = self.find(parent, y)
+        
+              if rank[xroot] < rank[yroot]:
+                  parent[xroot] = yroot
+              elif rank[xroot] > rank[yroot]:
+                  parent[yroot] = xroot
+              else :
+                  parent[yroot] = xroot
+                  rank[xroot] += 1
+                  
+        def KruskalMST(self):
+            result =[]
+        
+            i = 0
+            e = 0
+        
+            self.graph =  sorted(self.graph,key=lambda item: item[2])
+            parent = []
+            rank = []
+        
+            for node in range(self.V):
+                parent.append(node)
+                rank.append(0)
+            
+            while e < self.V -1 :
+                u,v,w =  self.graph[i]
+                i = i + 1
+                x = self.find(parent, u)
+                y = self.find(parent ,v)
+                if x != y:
+                    e = e + 1
+                    result.append([u,v,w])
+                    self.union(parent, rank, x, y)
+            weights = 0
+            for u,v,w in result:
+                weights += w
+            return weights
+    
+    position = state[0]
+    
+    food_list = []
+    
+    for i in range(4):
+        if not state[i+1]:
+            food_list.append(corners[i])
+    
+    g = Graph(len(food_list)+1)
+    
+    
+    matrix = []
+    
+    for i in range(len(food_list)+1):
+        matrix.append([])
+        
+    for i in range(len(food_list)):
+        for j in range(len(food_list)):
+            matrix[i].append(manhattanDistance(food_list[i],food_list[j]))
+            
+    for i in range(len(food_list)):
+        matrix[i].append(manhattanDistance(food_list[i],position))
+        
+    for i in range(len(food_list)):
+        matrix[len(food_list)].append(manhattanDistance(food_list[i],position))
+        
+    matrix[len(food_list)].append(0)
+    
+    for i in range(len(food_list)+1):
+        for j in range(len(food_list)+1):
+            g.addEdge(i,j,matrix[i][j])
+    return g.KruskalMST()
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -491,10 +580,10 @@ def foodHeuristic(state, problem):
                   parent[xroot] = yroot
               elif rank[xroot] > rank[yroot]:
                   parent[yroot] = xroot
-        
               else :
                   parent[yroot] = xroot
                   rank[xroot] += 1
+                  
         def KruskalMST(self):
             result =[]
         
