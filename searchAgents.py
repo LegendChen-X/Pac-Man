@@ -468,8 +468,85 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
-
+    food_list = foodGrid.asList()
+    
+    from collections import defaultdict
+    class Graph:
+        def __init__(self,vertices):
+            self.V= vertices
+            self.graph = []
+        def addEdge(self,u,v,w):
+            self.graph.append([u,v,w])
+            
+        def find(self, parent, i):
+            if parent[i] == i:
+                return i
+            return self.find(parent, parent[i])
+            
+        def union(self, parent, rank, x, y):
+              xroot = self.find(parent, x)
+              yroot = self.find(parent, y)
+        
+              if rank[xroot] < rank[yroot]:
+                  parent[xroot] = yroot
+              elif rank[xroot] > rank[yroot]:
+                  parent[yroot] = xroot
+        
+              else :
+                  parent[yroot] = xroot
+                  rank[xroot] += 1
+        def KruskalMST(self):
+            result =[]
+        
+            i = 0
+            e = 0
+        
+            self.graph =  sorted(self.graph,key=lambda item: item[2])
+            parent = []
+            rank = []
+        
+            for node in range(self.V):
+                parent.append(node)
+                rank.append(0)
+            
+            while e < self.V -1 :
+                u,v,w =  self.graph[i]
+                i = i + 1
+                x = self.find(parent, u)
+                y = self.find(parent ,v)
+                if x != y:
+                    e = e + 1
+                    result.append([u,v,w])
+                    self.union(parent, rank, x, y)
+            weights = 0
+            for u,v,w in result:
+                weights += w
+            return weights
+    
+    g = Graph(len(food_list)+1)
+    
+    matrix = []
+    
+    for i in range(len(food_list)+1):
+        matrix.append([])
+        
+    for i in range(len(food_list)):
+        for j in range(len(food_list)):
+            matrix[i].append(manhattanDistance(food_list[i],food_list[j]))
+            
+    for i in range(len(food_list)):
+        matrix[i].append(manhattanDistance(food_list[i],position))
+        
+    for i in range(len(food_list)):
+        matrix[len(food_list)].append(manhattanDistance(food_list[i],position))
+        
+    matrix[len(food_list)].append(0)
+    
+    for i in range(len(food_list)+1):
+        for j in range(len(food_list)+1):
+            g.addEdge(i,j,matrix[i][j])
+    return g.KruskalMST()
+    
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
     def registerInitialState(self, state):
