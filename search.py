@@ -201,50 +201,41 @@ def nullHeuristic(state, problem=None):
     """
     return 0
     
-class heuristicPriorityWithFunction(PriorityQueue):
-    def  __init__(self, problem, priorityFunction):
-        "priorityFunction (item) -> priority"
-        self.problem = problem
-        self.priorityFunction = priorityFunction
-        PriorityQueue.__init__(self)
-        
-    def push(self, item, h):
-        "Adds an item to the queue with priority from the priority function"
-        PriorityQueue.push(self, item, self.priorityFunction(self.problem,item,h))
-        
-def calculate_F(problem, item, heuristic):
-    return problem.getCostOfActions(item[1]) + heuristic(item[0][-1], problem)
     
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    if problem.isGoalState(problem.getStartState()):
-        return []
-    p_queue = heuristicPriorityWithFunction(problem, calculate_F)
-    p_queue.push(([problem.getStartState()],[]), heuristic)
-    
-    visit = []
-    
+    class myComp:
+        def  __init__(self,g,h):
+            self.g = g
+            self.h = h
+            
+        def __lt__(self, other):
+            if (self.g + self.h) < (other.g + other.h): return True
+            if (self.g + self.h) == (other.g + other.h):
+                if self.h < other.h: return True
+            return False
+
+    if problem.isGoalState(problem.getStartState()): return []
+    p_queue = PriorityQueue()
+    p_queue.push(([problem.getStartState()],[]),myComp(0,heuristic(problem.getStartState(), problem)))
+    seen = {}
     while 1:
-        if p_queue.isEmpty():
-            return []
+        if p_queue.isEmpty(): return []
         path, actions = p_queue.pop()
         state = path[-1]
-        
-        if state in visit: continue
-        
-        visit.append(state)
-        
         if problem.isGoalState(state): return actions
-        succs = problem.getSuccessors(state)
+        if state in seen:
+            if seen[state] < problem.getCostOfActions(actions): continue
+        seen[state] = problem.getCostOfActions(actions)
         
+        succs = problem.getSuccessors(state)
         for succ in succs:
-            if succ[0] not in visit:
-                new_path = list(path)
-                new_path.append(succ[0])
-                new_actions = list(actions)
-                new_actions.append(succ[1])
-                p_queue.push((new_path,new_actions),heuristic)
+            if succ[0] not in seen or problem.getCostOfActions(actions+[succ[1]]) < seen[succ[0]]:
+                new_path = path + [succ[0]]
+                new_actions = actions + [succ[1]]
+                p_queue.push(([new_path,new_actions]),myComp(problem.getCostOfActions(new_actions),heuristic(succ[0], problem)))
+                seen[succ[0]] = problem.getCostOfActions(new_actions)
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
