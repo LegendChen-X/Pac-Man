@@ -87,7 +87,7 @@ def heuristicMST(position,food_list):
             else:
                 parent[y_root] = x_root
                 rank[x_root] += 1
-                      
+
         def KruskalMST(self):
             MST =[]
             i = 0
