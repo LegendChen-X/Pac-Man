@@ -91,62 +91,39 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    if problem.isGoalState(problem.getStartState()):
-        return []
-        
+    if problem.isGoalState(problem.getStartState()): return []
     stack = Stack()
-    
     stack.push(([problem.getStartState()],[]))
-    
     while 1:
-        if stack.isEmpty():
-            return []
-            
+        if stack.isEmpty(): return []
         path, actions = stack.pop()
         state = path[-1]
-        
-        if problem.isGoalState(state):
-            return actions
-        
+        if problem.isGoalState(state): return actions
         succs = problem.getSuccessors(state)
         for succ in succs:
             if succ[0] not in path:
-                new_path = list(path)
-                new_path.append(succ[0])
-                new_actions = list(actions)
-                new_actions.append(succ[1])
+                new_path = path + [succ[0]]
+                new_actions = actions + [succ[1]]
                 stack.push((new_path,new_actions))
     
-    
-
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    if problem.isGoalState(problem.getStartState()):
-        return []
-        
+    if problem.isGoalState(problem.getStartState()): return []
     queue = Queue()
     queue.push(([problem.getStartState()],[]))
     seen = []
-    
     while 1:
-        if queue.isEmpty():
-            return []
-            
+        if queue.isEmpty(): return []
         path, actions = queue.pop()
         state = path[-1]
-        
-        if problem.isGoalState(state):
-            return actions
-            
+        if problem.isGoalState(state): return actions
         succs = problem.getSuccessors(state)
         for succ in succs:
             if succ[0] not in path and succ[0] not in seen:
                 seen.append(succ[0])
-                new_path = list(path)
-                new_path.append(succ[0])
-                new_actions = list(actions)
-                new_actions.append(succ[1])
+                new_path = path + [succ[0]]
+                new_actions = actions + [succ[1]]
                 queue.push((new_path,new_actions))
 
 def uniformCostSearch(problem):
@@ -228,7 +205,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         if state in seen:
             if seen[state] < problem.getCostOfActions(actions): continue
         seen[state] = problem.getCostOfActions(actions)
-        
         succs = problem.getSuccessors(state)
         for succ in succs:
             if succ[0] not in seen or problem.getCostOfActions(actions+[succ[1]]) < seen[succ[0]]:
@@ -236,6 +212,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 new_actions = actions + [succ[1]]
                 p_queue.push(([new_path,new_actions]),myComp(problem.getCostOfActions(new_actions),heuristic(succ[0], problem)))
                 seen[succ[0]] = problem.getCostOfActions(new_actions)
+                
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
