@@ -64,13 +64,14 @@ def heuristicMST(position,food_list):
 #-----------!!!!!!No plagiarism!!!!!!----------#
 #-------------------------------Begin-------------------------------#
 # I use the MST to calculate the heuristic value like famous NP Hard problem TSP.
-# I subtle change the KruskalMST to satisfy my situation.
+# I subtly change the KruskalMST to satisfy my situation.
 # Reference: https://www.geeksforgeeks.org/kruskals-minimum-spanning-tree-algorithm-greedy-algo-2/
     from collections import defaultdict
     class Graph:
         def __init__(self,num_v):
             self.V= num_v
             self.graph = []
+            
         def addEdge(self,u,v,w):
             self.graph.append([u,v,w])
         
@@ -88,7 +89,7 @@ def heuristicMST(position,food_list):
                 rank[x_root] += 1
                       
         def KruskalMST(self):
-            result =[]
+            MST =[]
             i = 0
             e = 0
             self.graph = sorted(self.graph, key = lambda item: item[2])
@@ -104,10 +105,10 @@ def heuristicMST(position,food_list):
                 y = self.find(parent ,v)
                 if x != y:
                     e = e + 1
-                    result.append([u,v,w])
+                    MST.append([u,v,w])
                     self.union(parent, rank, x, y)
             weights = 0
-            for u,v,w in result: weights += w
+            for u,v,w in MST: weights += w
             return weights
 #---------------------!!!!!!No plagiarism!!!!!!---------------------#
 #-------------------------------End-------------------------------#
