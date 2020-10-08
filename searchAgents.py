@@ -58,80 +58,6 @@ class GoWestAgent(Agent):
 #       after you fill in parts of search.py          #
 #######################################################
 
-def heuristicMST(position,food_list):
-#-----------The code for class Graph is from Internet.----------#
-#-----------I just use graph data structure to calculate the heuristic value.----------#
-#-----------!!!!!!No plagiarism!!!!!!----------#
-#-------------------------------Begin-------------------------------#
-# I use the MST to calculate the heuristic value like famous NP Hard problem TSP.
-# I subtly change the KruskalMST to satisfy my situation.
-# Reference: https://www.geeksforgeeks.org/kruskals-minimum-spanning-tree-algorithm-greedy-algo-2/
-    from collections import defaultdict
-    class Graph:
-        def __init__(self,num_v):
-            self.V= num_v
-            self.graph = []
-            
-        def addEdge(self,u,v,w):
-            self.graph.append([u,v,w])
-        
-        def find(self, parent, i):
-            if parent[i] == i: return i
-            return self.find(parent, parent[i])
-                
-        def union(self, parent, rank, x, y):
-            x_root = self.find(parent, x)
-            y_root = self.find(parent, y)
-            if rank[x_root] < rank[y_root]: parent[x_root] = y_root
-            elif rank[x_root] > rank[y_root]: parent[y_root] = x_root
-            else:
-                parent[y_root] = x_root
-                rank[x_root] += 1
-
-        def KruskalMST(self):
-            MST =[]
-            i = 0
-            e = 0
-            self.graph = sorted(self.graph, key = lambda item: item[2])
-            parent = []
-            rank = []
-            for node in range(self.V):
-                parent.append(node)
-                rank.append(0)
-            while e < self.V -1 :
-                u,v,w =  self.graph[i]
-                i = i + 1
-                x = self.find(parent, u)
-                y = self.find(parent ,v)
-                if x != y:
-                    e = e + 1
-                    MST.append([u,v,w])
-                    self.union(parent, rank, x, y)
-            weights = 0
-            for u,v,w in MST: weights += w
-            return weights
-#---------------------!!!!!!No plagiarism!!!!!!---------------------#
-#-------------------------------End-------------------------------#
-
-#--------------------Main part of my heuristic value--------------------#
-    g = Graph(len(food_list)+1)
-    matrix = []
-    for i in range(len(food_list)+1):
-        matrix.append([])
-    for i in range(len(food_list)):
-        for j in range(len(food_list)):
-            matrix[i].append(manhattanDistance(food_list[i],food_list[j]))
-    for i in range(len(food_list)):
-        matrix[i].append(manhattanDistance(food_list[i],position))
-    for i in range(len(food_list)):
-        matrix[len(food_list)].append(manhattanDistance(food_list[i],position))
-    matrix[len(food_list)].append(0)
-    for i in range(len(food_list)+1):
-        for j in range(len(food_list)+1):
-            g.addEdge(i,j,matrix[i][j])
-    return g.KruskalMST()
-    
-
 class SearchAgent(Agent):
     """
     This very general search agent finds a path using a supplied search
@@ -342,6 +268,79 @@ def euclideanHeuristic(position, problem, info={}):
 # This portion is incomplete.  Time to write code!  #
 #####################################################
 
+def heuristicMST(position,food_list):
+#-----------The code for class Graph is from Internet.----------#
+#-----------I just use graph data structure to implement Kruskal's Algorithm to calculate the heuristic value.----------#
+#-----------!!!!!!No plagiarism!!!!!!----------#
+#-------------------------------Begin-------------------------------#
+# I use the MST to calculate the heuristic value like famous NP Hard problem TSP.
+# I subtly change the KruskalMST to satisfy my situation.
+# Reference: https://www.geeksforgeeks.org/kruskals-minimum-spanning-tree-algorithm-greedy-algo-2/
+    from collections import defaultdict
+    class Graph:
+        def __init__(self,num_v):
+            self.V= num_v
+            self.graph = []
+            
+        def addEdge(self,u,v,w):
+            self.graph.append([u,v,w])
+        
+        def find(self, parent, i):
+            if parent[i] == i: return i
+            return self.find(parent, parent[i])
+                
+        def union(self, parent, rank, x, y):
+            x_root = self.find(parent, x)
+            y_root = self.find(parent, y)
+            if rank[x_root] < rank[y_root]: parent[x_root] = y_root
+            elif rank[x_root] > rank[y_root]: parent[y_root] = x_root
+            else:
+                parent[y_root] = x_root
+                rank[x_root] += 1
+
+        def KruskalMST(self):
+            MST =[]
+            i = 0
+            e = 0
+            self.graph = sorted(self.graph, key = lambda item: item[2])
+            parent = []
+            rank = []
+            for node in range(self.V):
+                parent.append(node)
+                rank.append(0)
+            while e < self.V -1 :
+                u,v,w =  self.graph[i]
+                i = i + 1
+                x = self.find(parent, u)
+                y = self.find(parent ,v)
+                if x != y:
+                    e = e + 1
+                    MST.append([u,v,w])
+                    self.union(parent, rank, x, y)
+            weights = 0
+            for u,v,w in MST: weights += w
+            return weights
+#---------------------!!!!!!No plagiarism!!!!!!---------------------#
+#-------------------------------End-------------------------------#
+
+#--------------------Main part of my heuristic value--------------------#
+    g = Graph(len(food_list)+1)
+    matrix = []
+    for i in range(len(food_list)+1):
+        matrix.append([])
+    for i in range(len(food_list)):
+        for j in range(len(food_list)):
+            matrix[i].append(manhattanDistance(food_list[i],food_list[j]))
+    for i in range(len(food_list)):
+        matrix[i].append(manhattanDistance(food_list[i],position))
+    for i in range(len(food_list)):
+        matrix[len(food_list)].append(manhattanDistance(food_list[i],position))
+    matrix[len(food_list)].append(0)
+    for i in range(len(food_list)+1):
+        for j in range(len(food_list)+1):
+            g.addEdge(i,j,matrix[i][j])
+    return g.KruskalMST()
+    
 class CornersProblem(search.SearchProblem):
     """
     This search problem finds paths through all four corners of a layout.
